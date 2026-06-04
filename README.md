@@ -8,6 +8,67 @@
   <a href="README_zh.md">中文</a> &nbsp ｜ &nbsp English &nbsp
 </p>
 
+---
+
+## Cerebras Benchmark Compression Extension
+
+> **Pinned evalscope commit:** `85c89b1f182f2fa2aa94366e5bb3b8805e536ac9`
+
+This fork adds a **Stratified Diversity Pruner** as an upstream-quality extension,
+implementing three new pruned benchmark adapters:
+
+| Dataset | Adapter name | Pruning axes |
+|---|---|---|
+| LiveCodeBench v5 | `live_code_bench_pruned` | contest-date difficulty × algorithmic topic |
+| AA-LCR | `aa_lcr_pruned` | context-length band × reasoning type |
+| MMMU | `mmmu_pruned` | subject × image-encoder stress tier |
+
+### Setup
+
+```bash
+git clone https://github.com/zeeza18/evalscope.git
+cd evalscope
+git checkout 85c89b1f182f2fa2aa94366e5bb3b8805e536ac9
+pip install -e ".[all]"
+pip install numpy scikit-learn
+```
+
+### Run contract
+
+```bash
+# Full run
+evalscope eval --model <model> --datasets live_code_bench --output ./results_full/
+
+# Pruned run (50% kept)
+evalscope eval \
+    --model <model> \
+    --datasets live_code_bench_pruned \
+    --dataset-args '{"prune_ratio": 0.5}' \
+    --output ./results_pruned/
+
+# Compare
+python -m evalscope_ext.tools.compare_runs \
+    --full ./results_full/ --pruned ./results_pruned/
+```
+
+Swap `live_code_bench_pruned` → `aa_lcr_pruned` or `mmmu_pruned` for the other benchmarks.
+All three use the same `--dataset-args` interface.
+
+### Extension layout
+
+```
+evalscope/
+  pruners/
+    base.py               # abstract BasePruner
+    stratified.py         # StratifiedDiversityPruner
+  benchmarks/
+    live_code_bench_pruned/
+    aa_lcr_pruned/
+    mmmu_pruned/
+```
+
+---
+
 <p align="center">
 <img src="https://img.shields.io/badge/python-%E2%89%A53.10-5be.svg">
 <a href="https://badge.fury.io/py/evalscope"><img src="https://badge.fury.io/py/evalscope.svg" alt="PyPI version" height="18"></a>
