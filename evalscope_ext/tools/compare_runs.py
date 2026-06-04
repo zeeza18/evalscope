@@ -29,6 +29,9 @@ def _load_results(directory: Path) -> dict[str, dict[str, float]]:
     evalscope writes results/<model>/<benchmark>/result.json (or similar).
     We accept multiple layouts and fall back to scanning for any *.json.
     """
+    if not directory.exists():
+        print(f"WARNING: directory not found: {directory}", file=sys.stderr)
+        return {}
     results: dict[str, dict[str, float]] = {}
     for model_dir in sorted(directory.iterdir()):
         if not model_dir.is_dir():
